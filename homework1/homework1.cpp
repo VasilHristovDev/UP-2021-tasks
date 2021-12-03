@@ -232,7 +232,7 @@ int main3()
     int a, b;
     std::cout << "Enter the interval [a,b] :";
     std::cin >> a >> b;
-    if ( a > b)
+    if ( a > b )
     {
         std::cerr<<"Invalid interval a <= b"<<std::endl;
         return -1;
