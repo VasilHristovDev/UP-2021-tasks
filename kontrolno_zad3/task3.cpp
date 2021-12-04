@@ -44,7 +44,11 @@ bool isValidRotationOfArray(const char array[], const char rotation[], int sizeA
                 elementsOnTheSamePositionCounter++;
         }
         if(elementsOnTheSamePositionCounter == sizeArray)
+        {
+            delete pointerToRotation;
             return true;
+        }
+
     }
 
     delete pointerToRotation;
