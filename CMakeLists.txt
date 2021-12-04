@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 14)
 
 #add_executable(UP_2021_tasks homework1/homework1.cpp )
 #add_executable(UP_2021_tasks  pointers/pointers_with_arrays1.cpp)
-add_executable(UP_2021_tasks  kontrolno_zad3/task3.cpp)
+add_executable(UP_2021_tasks kontrolno_zad3/task3.cpp)

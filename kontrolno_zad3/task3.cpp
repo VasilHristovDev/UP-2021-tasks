@@ -1,8 +1,59 @@
 #include <iostream>
-bool isARotation( const char array[], char subarray[], int size1, int size2)
+const int MAX_SIZE = 100;
+
+// функция за завъртане на подмасива
+// последния елемент става първи, а останалите елементи се изместват с една позиция напред
+// Пример: 'j', 'o', 's' -> 's', 'j', 'o'
+char * rotate(const char array[], int size)
 {
-    int counterChecker = 0;
-    int index2 = 0;
+    char* rotation = new char[MAX_SIZE];
+    rotation[0] = array[size - 1];
+    for (int j = 1; j < size ; j++)
+    {
+        rotation[j] = array[j - 1];
+    }
+    //връщаме указател към първия елемент на масива в паметта
+    return rotation;
+}
+//Проверка дали даден масив е валидна ротация на друг
+bool isValidRotationOfArray(const char array[], const char rotation[], int sizeArray)
+{
+    char checkArray[MAX_SIZE];
+    int elementsOnTheSamePositionCounter = 0;
+    char * pointerToRotation;
+
+    for (int i = 0; i < sizeArray; i++)
+    {
+        if(array[i] == rotation[i])
+            elementsOnTheSamePositionCounter++;
+    }
+    if(elementsOnTheSamePositionCounter == sizeArray)
+        return true;
+
+    for (int i = 0; i < sizeArray - 1; i++)
+    {
+        elementsOnTheSamePositionCounter = 0;
+         pointerToRotation = rotate(rotation, sizeArray);
+        for (int j = 0; j < sizeArray; j++)
+        {
+            checkArray[j] = *(pointerToRotation + j);
+        }
+        for (int j = 0; j < sizeArray; j++)
+        {
+            if(array[j] == checkArray[j])
+                elementsOnTheSamePositionCounter++;
+        }
+        if(elementsOnTheSamePositionCounter == sizeArray)
+            return true;
+    }
+
+    delete pointerToRotation;
+    return false;
+}
+bool isSubArray( const char array[], char subarray[], int size1, int size2)
+{
+    int counterChecker;
+    int index2;
     for (int i = 0; i < size1; i++)
     {
         counterChecker = 0;
@@ -27,11 +78,15 @@ bool isARotation( const char array[], char subarray[], int size1, int size2)
     }
     return false;
 }
-const int MAX_SIZE = 100;
-void isAnyRotation ( char array[], const char subArray[], int size1, int size2)
+
+//Ако втория масив не е подмасив на първия проверяваме дали
+//След изтриването на дадени елементи се получава валидна ротация на подмасива
+bool isAnyRotation ( const char array[], const char subArray[], int size1, int size2)
 {
     int counterOfRemovedIndexes = 0;
+    //тук записваме ротацията на елементите в първия масив, съвпадащи на елементите от втория
     char rotation[MAX_SIZE];
+
     for (int i = 0; i < size1; i++)
     {
         for (int j = 0; j < size2; j++)
@@ -42,35 +97,44 @@ void isAnyRotation ( char array[], const char subArray[], int size1, int size2)
             }
         }
     }
-    std::cout<<"Rotation found '";
-    for (int i = 0; i < counterOfRemovedIndexes ; i++)
+    if(isValidRotationOfArray(rotation, subArray, size2) && counterOfRemovedIndexes == size1 - size2)
     {
-        std::cout<<rotation[i];
-    }
-    std::cout<<"' "<<std::endl;
-    bool itContains = false;
-    std::cout<<"Removed indexes ";
-    for (int i = 0; i < size1; i++)
-    {
-        itContains = false;
-        for (int j = 0; j < counterOfRemovedIndexes; j++)
+        std::cout<<"Rotation found '";
+        for (int i = 0; i < counterOfRemovedIndexes ; i++)
         {
-            if (array[i] == rotation[j])
+            std::cout<<rotation[i];
+        }
+        std::cout<<"' "<<std::endl;
+        //Проверка кои са индексите, които трябва да се изтрият, за да се получи ротацията
+        bool isRotationIndex = false;
+
+        std::cout<<"Removed indexes ";
+        for (int i = 0; i < size1; i++)
+        {
+            isRotationIndex = false;
+            for (int j = 0; j < counterOfRemovedIndexes; j++)
             {
-                itContains = true;
+                if (array[i] == rotation[j])
+                {
+                    isRotationIndex = true;
+                }
+            }
+            if(!isRotationIndex)
+            {
+                std::cout<<i<<" ";
             }
         }
-        if(!itContains)
-        {
-            std::cout<<i<<" ";
-        }
+        return true;
     }
-    std::cout<<std::endl;
+    else
+    {
+        return false;
+    }
 
 }
+
 int main()
 {
-
     char subArray [MAX_SIZE];
     char array [MAX_SIZE];
     
@@ -79,59 +143,53 @@ int main()
     
     std::cout<< "Size of array:";
     std::cin>>sizeArray;
+
     std::cout<< "Size of sub array:";
     std::cin>>sizeSubArray;
-    
+    //валидация
     if(sizeSubArray > sizeArray)
     {
         std::cerr<<"The size of sub array cannot be bigger than the size of the array!";
         return -1;
     }
+
     for (int i = 0; i < sizeArray ; i++)
     {
         std::cout<<"array["<<i<<"]:";
         std::cin>>array[i];
     }
-    char copyArray[MAX_SIZE];
+    //помощен масив, който ще ни помогне да проверим, ако втория масив не е подмасив на първия
+    //дали някоя ротация на втория се съдържа в първия
+    char checkAnyRotationArray[MAX_SIZE];
     bool foundSubArray = false;
+
     for (int i = 0; i < sizeSubArray ; i++)
     {
         std::cout<<"subArray["<<i<<"]:";
         std::cin>>subArray[i];
-        copyArray[i] = subArray[i];
+        checkAnyRotationArray[i] = subArray[i];
     }
 
+    char* pointerToRotation;
     for (int i = 0; i < sizeSubArray - 1 ; i++)
     {
-        for (int j = 0; j < sizeSubArray ; j++)
-        {
-            if(j == 0)
-            {
-                subArray[j] = copyArray[sizeSubArray - 1];
-            }
-            else
-            {
-                subArray[j] = copyArray[j - 1];
-            }
-
-            std::cout<<subArray[j]<<" ";
-        }
-        for (int j = 0; j < sizeSubArray ; j++)
-        {
-            copyArray[j] = subArray[j];
+        pointerToRotation = rotate(subArray, sizeSubArray);
+        for (int j = 0; j < sizeSubArray ; j++) {
+            subArray[j] = *(pointerToRotation + j);
         }
         std::cout<<std::endl;
-        if(isARotation(array, subArray, sizeArray, sizeSubArray))
+        if(isSubArray(array, subArray, sizeArray, sizeSubArray))
         {
             foundSubArray = true;
         }
-
     }
     if (!foundSubArray)
     {
-        std::cout<<"No rotation found!"<<std::endl;
-        isAnyRotation(array, subArray, sizeArray, sizeSubArray);
+       if(!isAnyRotation(array,  checkAnyRotationArray, sizeArray, sizeSubArray))
+       {
+           std::cout<<"No rotation found!"<<std::endl;
+       }
     }
+    delete pointerToRotation;
     return 0;
-    
 }
