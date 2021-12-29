@@ -320,8 +320,38 @@ int main8()
     mostCommonWord(str);
     return 0;
 }
+unsigned sizeOfLongestPrefixSuffix(const char str[])
+{
+    unsigned strLen = length(str);
+    unsigned i = 1;
+    unsigned len = 0;
+    if(strLen < 2)
+    {
+        return 0;
+    }
+    while ( i < strLen)
+    {
+        if(str[i] == str[len])
+        {
+            len++;
+            i++;
+        }
+        else
+        {
+            i = i - len + 1;
+            len = 0;
+        }
+    }
+
+    return len >= strLen / 2 ? len / 2 : len;
+}
 int main()
 {
-
+    char str[MAX_SIZE];
+    std::cin.getline(str, MAX_SIZE);
+    for (int i = 0; i < sizeOfLongestPrefixSuffix(str) ; ++i) {
+        std::cout<<str[i];
+    }
+    return 0;
 }
 
