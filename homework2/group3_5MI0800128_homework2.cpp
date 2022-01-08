@@ -94,24 +94,26 @@ char * calculateStr(char number1[],char number2[], int k)
     int currentIndex = 0;
     int occupiedIndex = 0;
 
+    int currSum = 0;
     if(isBigger)
     {
         while(number1[currentIndex])
         {
-            if(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) + flag >= k)
+            currSum = parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]);
+            if(currSum + flag >= k)
             {
-                if(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) - k + flag >= 10)
-                    result[occupiedIndex++] = parseChar(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) - k + flag);
+                if(currSum - k + flag >= 10)
+                    result[occupiedIndex++] = parseChar(currSum - k + flag);
                 else
-                    result[occupiedIndex++] =  toChar(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) - k + flag);
+                    result[occupiedIndex++] =  toChar(currSum - k + flag);
                 flag = 1;
             }
             else
             {
-                if(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) + flag >= 10)
-                    result[occupiedIndex++] = parseChar(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex])  + flag);
+                if(currSum + flag >= 10)
+                    result[occupiedIndex++] = parseChar(currSum  + flag);
                 else
-                    result[occupiedIndex++] = toChar(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex])  + flag);
+                    result[occupiedIndex++] = toChar(currSum  + flag);
                 flag = 0;
             }
             currentIndex++;
@@ -122,20 +124,21 @@ char * calculateStr(char number1[],char number2[], int k)
     {
         while(number2[currentIndex])
         {
-            if(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) + flag >= k)
+            currSum = parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]);
+            if(currSum + flag >= k)
             {
-                if(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) - k + flag >= 10)
-                    result[occupiedIndex++] = parseChar(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) - k + flag);
+                if(currSum - k + flag >= 10)
+                    result[occupiedIndex++] = parseChar(currSum - k + flag);
                 else
-                    result[occupiedIndex++] =  toChar(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) - k + flag);
+                    result[occupiedIndex++] =  toChar(currSum - k + flag);
                 flag = 1;
             }
             else
             {
-                if(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) + flag >= 10)
-                    result[occupiedIndex++] = parseChar(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]) + flag);
+                if(currSum + flag >= 10)
+                    result[occupiedIndex++] = parseChar(currSum + flag);
                 else
-                    result[occupiedIndex++] = toChar(parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex])+ flag);
+                    result[occupiedIndex++] = toChar(currSum + flag);
                 flag = 0;
             }
             currentIndex++;
@@ -157,7 +160,7 @@ char * calculateStr(char number1[],char number2[], int k)
 }
 int main2_TERC()
 {
-    char number1[MAX_SIZE],number2[MAX_SIZE];
+    char number1[MAX_SIZE], number2[MAX_SIZE];
     std::cout<<"Enter number 1:";
     std::cin>>number1;
 
