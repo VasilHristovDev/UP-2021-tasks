@@ -1,40 +1,10 @@
 #include <iostream>
+#include <cstring>
 
-const int MAX_SIZE = 100;
+const int MAX_SIZE_TEXT = 1024;
+const int MAX_SIZE_DICTIONARY = 128;
+const int MAX_SIZE_WORD = 100;
 
-int main()
-{
-    int matrix1[MAX_SIZE][MAX_SIZE];
-    int matrix2[MAX_SIZE][MAX_SIZE];
-
-    int n1,n2;
-    int m1,m2;
-
-    std::cout<<"Enter the sizes of the first matrix (nxm):";
-    std::cin>>n1>>m1;
-
-    std::cout<<"Enter the first matrix:"<<std::endl;
-
-    for (int i = 0; i < n1; ++i) {
-        for (int j = 0; j < m1; ++j) {
-            std::cin>>matrix1[i][j];
-        }
-    }
-
-    std::cout<<"Enter the sizes of the second matrix (nxm):";
-    std::cin>>n2>>m2;
-
-    std::cout<<"Enter the second matrix:"<<std::endl;
-
-    for (int i = 0; i < n2; ++i) {
-        for (int j = 0; j < m2; ++j) {
-            std::cin>>matrix2[i][j];
-        }
-    }
-
-}
-
-// дължина на стринг
 unsigned length(const char number[])
 {
 
@@ -45,6 +15,152 @@ unsigned length(const char number[])
     }
     return i;
 }
+char * autoCorrect(char * text, char ** dictionary, int numberOfWordsInDictionary)
+{
+    char * correctedText = new char [MAX_SIZE_TEXT * 2];
+
+
+}
+int main()
+{
+    char text[MAX_SIZE_TEXT];
+    int numberOfCharacters;
+
+    std::cout<<"Enter number of characters in text:";
+    std::cin>>numberOfCharacters;
+
+    char line[MAX_SIZE_TEXT];
+    unsigned enteredCharacters = 0;
+    text[0] = '\0';
+
+    std::cout<<"Enter text:";
+
+    std::cin.ignore();
+    while(enteredCharacters < numberOfCharacters)
+    {
+        std::cin.getline(line,numberOfCharacters - enteredCharacters);
+        strcat_s(text, "\n");
+        strcat_s(text,line);
+        enteredCharacters = length(text);
+    }
+
+
+    int numberOfWordsInsideDictionary;
+    std::cout<<"Enter number of words in dictionary:";
+    std::cin>>numberOfWordsInsideDictionary;
+
+    char dictionary[MAX_SIZE_DICTIONARY][MAX_SIZE_WORD];
+
+    for (int i = 0; i < numberOfWordsInsideDictionary; ++i) {
+        std::cin.getline(dictionary[i], MAX_SIZE_WORD);
+    }
+    for (int i = 0; i < numberOfWordsInsideDictionary; ++i) {
+        std::cout<<dictionary[i]<<std::endl;
+    }
+
+
+    return 0;
+}
+void transformMatrix(int ** &A, int ** &B, int &N1, int &M1, int N2, int M2)
+{
+    if(N1 > N2)
+    {
+        for (int i = N2; i < N1; ++i) {
+            delete[] A[i];
+            A[i] = nullptr;
+        }
+        N1 = N2;
+    }
+    if(M1 > M2)
+    {
+       int ** matrixLessColumns = new int *[N1];
+        for (int i = 0; i < N1; ++i) {
+            matrixLessColumns[i] = new int [M2];
+            for (int j = 0; j < M2; ++j) {
+                matrixLessColumns[i][j] = A[i][j];
+            }
+        }
+        for (int i = 0; i < N1; ++i) {
+            delete [] A[i];
+        }
+        delete[] A;
+        A = matrixLessColumns;
+        M1 = M2;
+
+    }
+    for (int i = 0; i < N1 ; ++i) {
+        for (int j = 0; j < M1; ++j) {
+            if(A[i][j] > B[i][j])
+            {
+                A[i][j] = -A[i][j];
+            }
+            else if(A[i][j] < B[i][j])
+            {
+                A[i][j] = B[i][j];
+            }
+        }
+    }
+
+}
+int main2()
+{
+    int n1,n2;
+    int m1,m2;
+    std::cout<<"Enter the sizes of the first matrix (nxm):";
+    std::cin>>n1>>m1;
+
+    int ** matrix1 = new int * [n1];
+    std::cout<<"Enter the first matrix:"<<std::endl;
+
+    for (int i = 0; i < n1; ++i) {
+        matrix1[i] = new int [m1];
+        for (int j = 0; j < m1; ++j) {
+            std::cin>>matrix1[i][j];
+        }
+    }
+
+    std::cout<<"Enter the sizes of the second matrix (n x m):";
+    std::cin>>n2>>m2;
+
+    int ** matrix2 = new int* [n2];
+    std::cout<<"Enter the second matrix:"<<std::endl;
+
+    for (int i = 0; i < n2; ++i) {
+        matrix2[i] = new int [m2];
+        for (int j = 0; j < m2; ++j) {
+            std::cin>>matrix2[i][j];
+        }
+    }
+    transformMatrix(matrix1,matrix2,n1,m1,n2,m2);
+
+    std::cout<<std::endl;
+    for (int i = 0; i < n1 ; ++i) {
+        for (int j = 0; j < m1; ++j) {
+            std::cout<<matrix1[i][j]<<" ";
+        }
+        std::cout<<std::endl;
+    }
+
+    for (int i = 0; i < n1; ++i) {
+        delete [] matrix1[i];
+        matrix1[i] = nullptr;
+    }
+    delete [] matrix1;
+    matrix1 = nullptr;
+
+    for (int i = 0; i < n2; ++i) {
+        delete[] matrix2[i];
+        matrix2[i] = nullptr;
+    }
+    delete [] matrix2;
+    matrix2 = nullptr;
+
+    return 0;
+}
+
+const int MAX_SIZE = 100;
+// дължина на стринг
+
 //обръщане на стринг
 void reverse(char * &str)
 {
