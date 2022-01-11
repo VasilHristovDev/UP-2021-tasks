@@ -5,23 +5,134 @@ const int MAX_SIZE_TEXT = 1024;
 const int MAX_SIZE_DICTIONARY = 128;
 const int MAX_SIZE_WORD = 100;
 
-unsigned length(const char number[])
+//дължина на стринг
+int length(const char number[])
 {
 
-    unsigned i = 0;
+    int i = 0;
     while(number[i])
     {
         i++;
     }
     return i;
 }
-char * autoCorrect(char * text, char ** dictionary, int numberOfWordsInDictionary)
+
+//Проверка дали сгрешената дума се съдържа в следващите length(word) позиции
+//и дали следващия символ е различен от буква
+bool containsFromCurrentPosition(const char * text, char * word, int currentIndex)
+{
+    int wordIndex = 0;
+    int counter = 0;
+    for (int i = currentIndex; i < currentIndex + length(word); ++i) {
+        if(text[i] == word[wordIndex++])
+            counter++;
+        else
+            return false;
+    }
+    return counter == length(word) && (text[currentIndex + length(word)] == ' ' || text[currentIndex + length(word)] == '.' &&
+            !(text[currentIndex + length(word)] >= 'A' && text[currentIndex + length(word)] <= 'Z') &&
+            !(text[currentIndex + length(word)] >= 'z' && text[currentIndex + length(word)] <= 'z'));
+}
+
+// функцията връща масив с всички позиции на двойни кавички
+int * quotationMarksPositionsInText(const char * text, int &count)
+{
+    for (int i = 0; i < length(text) ; ++i) {
+        if(text[i] == '"')
+        {
+            count++;
+        }
+
+    }
+    int * positions = new int [count + 1];
+    int occupied = 0;
+    for (int i = 0; i < length(text); ++i) {
+        if(text[i] == '"')
+        {
+            positions[occupied++] = i;
+        }
+    }
+
+    return positions;
+}
+
+//проверка дали кавичката е отваряща
+bool isOnOddPosition(const int * positions, int position, int count)
+{
+    int pos;
+    for (int i = 0; i < count; ++i) {
+        if(positions[i] == position)
+            pos = i;
+    }
+    return pos % 2 == 0;
+}
+
+char * autoCorrect(const char * text, char  dictionary[MAX_SIZE_DICTIONARY][MAX_SIZE_WORD], int numberOfWordsInDictionary)
 {
     char * correctedText = new char [MAX_SIZE_TEXT * 2];
+    int currentChar = 0;
+    int occupiedChar = 0;
+    int countOfQuotationMarks = 0;
+    int * ptrToPositionsOfQuotationMarks = quotationMarksPositionsInText(text, countOfQuotationMarks);
+    char wrongWord[MAX_SIZE_WORD];
+    char correctedWord[MAX_SIZE_WORD];
 
+    while(currentChar <= length(text))
+    {
 
+        for (int i = 0; i < numberOfWordsInDictionary; ++i) {
+            int tempIndex = 0;
+            int tempCorrectedIndex = 0;
+            while(dictionary[i][tempIndex] != '-')
+            {
+                wrongWord[tempIndex] = dictionary[i][tempIndex];
+                tempIndex++;
+            }
+            wrongWord[tempIndex++] = '\0';
+            if(containsFromCurrentPosition(text,wrongWord, currentChar))
+            {
+                while(dictionary[i][tempIndex] != '\0')
+                {
+                    correctedWord[tempCorrectedIndex++] = dictionary[i][tempIndex++];
+                }
+                correctedWord[tempCorrectedIndex++] = '\0';
+                tempCorrectedIndex = 0;
+                for (int j = occupiedChar; j < occupiedChar + length(correctedWord); ++j) {
+                    correctedText[j] = correctedWord[tempCorrectedIndex++];
+                }
+                occupiedChar+= length(correctedWord) - 1;
+                currentChar+= length(wrongWord) - 1;
+            }
+        }
+        if((text[currentChar] !=' ') && (text[currentChar + 1] == '+' ||
+            text[currentChar + 1] == '-' || text[currentChar + 1] == '=' ||
+            text[currentChar] == '*' || text[currentChar + 1] == '(' ||
+            (text[currentChar + 1] == '"' && isOnOddPosition(ptrToPositionsOfQuotationMarks, currentChar + 1, countOfQuotationMarks))||
+            (text[currentChar] == ',' || text[currentChar] == '.' || text[currentChar] == '!' || text[currentChar] == '?' ||
+            text[currentChar] == ';' || text[currentChar] == ':') && text[currentChar+1] != ' ' && text[currentChar+1] != '\n'))
+        {
+            correctedText[occupiedChar++] = text[currentChar];
+            correctedText[occupiedChar++] = ' ';
+        }
+        else if((text[currentChar] != '.') && (text[currentChar + 1] == '\n' || text[currentChar + 1] == '\0'))
+        {
+            correctedText[occupiedChar++] = '.';
+            correctedText[occupiedChar++] = text[currentChar];
+        }
+        else
+        {
+            correctedText[occupiedChar++] = text[currentChar];
+        }
+        currentChar++;
+
+    }
+    correctedText[occupiedChar++] = '\0';
+    delete [] ptrToPositionsOfQuotationMarks;
+    ptrToPositionsOfQuotationMarks = nullptr;
+
+    return correctedText;
 }
-int main()
+int main0()
 {
     char text[MAX_SIZE_TEXT];
     int numberOfCharacters;
@@ -38,7 +149,7 @@ int main()
     std::cin.ignore();
     while(enteredCharacters < numberOfCharacters)
     {
-        std::cin.getline(line,numberOfCharacters - enteredCharacters);
+        std::cin.getline(line,numberOfCharacters - enteredCharacters + 1);
         strcat_s(text, "\n");
         strcat_s(text,line);
         enteredCharacters = length(text);
@@ -50,21 +161,29 @@ int main()
     std::cin>>numberOfWordsInsideDictionary;
 
     char dictionary[MAX_SIZE_DICTIONARY][MAX_SIZE_WORD];
-
+    std::cin.ignore();
     for (int i = 0; i < numberOfWordsInsideDictionary; ++i) {
         std::cin.getline(dictionary[i], MAX_SIZE_WORD);
     }
-    for (int i = 0; i < numberOfWordsInsideDictionary; ++i) {
-        std::cout<<dictionary[i]<<std::endl;
+
+    char * ptrToCorrectedText = autoCorrect(text, dictionary, numberOfWordsInsideDictionary);
+    for (int i = 0; i < length(ptrToCorrectedText); ++i) {
+        std::cout<<ptrToCorrectedText[i];
     }
+
+    delete [] ptrToCorrectedText;
+    ptrToCorrectedText = nullptr;
 
 
     return 0;
 }
+
+
 void transformMatrix(int ** &A, int ** &B, int &N1, int &M1, int N2, int M2)
 {
     if(N1 > N2)
     {
+        //изтриваме редовете от N2 до N1
         for (int i = N2; i < N1; ++i) {
             delete[] A[i];
             A[i] = nullptr;
@@ -73,6 +192,7 @@ void transformMatrix(int ** &A, int ** &B, int &N1, int &M1, int N2, int M2)
     }
     if(M1 > M2)
     {
+        //Заделяме нова матрица с по-малко колони
        int ** matrixLessColumns = new int *[N1];
         for (int i = 0; i < N1; ++i) {
             matrixLessColumns[i] = new int [M2];
@@ -80,10 +200,12 @@ void transformMatrix(int ** &A, int ** &B, int &N1, int &M1, int N2, int M2)
                 matrixLessColumns[i][j] = A[i][j];
             }
         }
+        //Изтриваме старата
         for (int i = 0; i < N1; ++i) {
             delete [] A[i];
         }
         delete[] A;
+        //Подаваме и указател към новата
         A = matrixLessColumns;
         M1 = M2;
 
@@ -141,6 +263,7 @@ int main2()
         std::cout<<std::endl;
     }
 
+    //изчистваме заделената памет:
     for (int i = 0; i < n1; ++i) {
         delete [] matrix1[i];
         matrix1[i] = nullptr;
@@ -159,6 +282,7 @@ int main2()
 }
 
 const int MAX_SIZE = 100;
+const int MIN_LENGTH_FOR_LETTER = 10;
 // дължина на стринг
 
 //обръщане на стринг
@@ -178,9 +302,9 @@ int parseNumber(char chr)
     if( chr >= '0' && chr <= '9')
         return chr - '0';
     else if(chr >= 'a' && chr <= 'z')
-        return chr - 'a' + 10;
+        return chr - 'a' + MIN_LENGTH_FOR_LETTER;
     else if(chr >= 'A' && chr <= 'Z')
-        return chr - 'A' + 10;
+        return chr - 'A' + MIN_LENGTH_FOR_LETTER;
     else
         return 0;
 }
@@ -203,69 +327,43 @@ char * calculateStr(char number1[],char number2[], int k)
     reverse(number1);
     reverse(number2);
 
-
     bool isBigger = length(number1) > length(number2);
 
-    int flag = 0;
+    int remainder = 0;
     int currentIndex = 0;
     int occupiedIndex = 0;
 
     int currSum = 0;
-    if(isBigger)
+    while(isBigger? number1[currentIndex] : number2[currentIndex])
     {
-        while(number1[currentIndex])
+        currSum = parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]);
+        //Ако сумата е по-голяма от системата, в която се намираме
+        if(currSum + remainder >= k)
         {
-            currSum = parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]);
-            if(currSum + flag >= k)
-            {
-                if(currSum - k + flag >= 10)
-                    result[occupiedIndex++] = parseChar(currSum - k + flag);
-                else
-                    result[occupiedIndex++] =  toChar(currSum - k + flag);
-                flag = 1;
-            }
+            //Ако се намираме в бройна система по-голяма от десетичната, записваме съответната буква
+            if(currSum - k + remainder >= MIN_LENGTH_FOR_LETTER)
+                result[occupiedIndex++] = parseChar(currSum - k + remainder);
             else
-            {
-                if(currSum + flag >= 10)
-                    result[occupiedIndex++] = parseChar(currSum  + flag);
-                else
-                    result[occupiedIndex++] = toChar(currSum  + flag);
-                flag = 0;
-            }
-            currentIndex++;
+                result[occupiedIndex++] =  toChar(currSum - k + remainder);
+            remainder = 1;
         }
+        else
+        {
+            if(currSum + remainder >= MIN_LENGTH_FOR_LETTER)
+                result[occupiedIndex++] = parseChar(currSum  + remainder);
+            else
+                result[occupiedIndex++] = toChar(currSum  + remainder);
+            remainder = 0;
+        }
+        currentIndex++;
     }
 
-    else
-    {
-        while(number2[currentIndex])
-        {
-            currSum = parseNumber(number1[currentIndex]) + parseNumber(number2[currentIndex]);
-            if(currSum + flag >= k)
-            {
-                if(currSum - k + flag >= 10)
-                    result[occupiedIndex++] = parseChar(currSum - k + flag);
-                else
-                    result[occupiedIndex++] =  toChar(currSum - k + flag);
-                flag = 1;
-            }
-            else
-            {
-                if(currSum + flag >= 10)
-                    result[occupiedIndex++] = parseChar(currSum + flag);
-                else
-                    result[occupiedIndex++] = toChar(currSum + flag);
-                flag = 0;
-            }
-            currentIndex++;
-        }
 
-    }
 
-    //ако е останал флаг 1 го прибавяме към стринга
-    if(flag == 1)
+    //ако е останал остатък 1 го прибавяме към стринга
+    if(remainder == 1)
     {
-        result[occupiedIndex++] = toChar(flag);
+        result[occupiedIndex++] = toChar(remainder);
     }
     //слагаме последния символ
     result[occupiedIndex++] = '\0';
@@ -274,7 +372,7 @@ char * calculateStr(char number1[],char number2[], int k)
     return result;
 
 }
-int main2_TERC()
+int main()
 {
     char number1[MAX_SIZE], number2[MAX_SIZE];
     std::cout<<"Enter number 1:";
