@@ -372,7 +372,7 @@ char * calculateStr(char number1[],char number2[], int k)
     return result;
 
 }
-int main()
+int main2_TERC()
 {
     char number1[MAX_SIZE], number2[MAX_SIZE];
     std::cout<<"Enter number 1:";
