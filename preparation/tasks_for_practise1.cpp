@@ -555,6 +555,7 @@ bool rowsAndColsDistinct(int field[MAX_SIZE][MAX_SIZE], int n)
         if(rowHasDistinctElements(field[i],n))
             countDistinctRows++;
     }
+
     int occupiedElements = 0;
     int * column = new int [n*n];
     for (int i = 0; i < n * n; ++i) {
@@ -597,6 +598,7 @@ bool checkSudoku(int field[MAX_SIZE][MAX_SIZE], int n, int i, int j, int iBase, 
             }
         }
     }
+
     int sumToCheck = 0;
     for (int k = n * n - 1; k > 0; --k) {
         sumToCheck +=k;
